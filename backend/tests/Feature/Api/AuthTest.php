@@ -1,0 +1,119 @@
+<?php
+
+namespace Tests\Feature\Api;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class AuthTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * Test successful login.
+     */
+    public function test_user_can_login_with_valid_credentials(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'budi@kantor.com',
+            'password' => Hash::make('password123'),
+            'position' => 'Staff IT',
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => 'budi@kantor.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'token',
+                    'user' => ['id', 'name', 'email', 'position'],
+                ],
+            ])
+            ->assertJsonPath('data.user.email', 'budi@kantor.com');
+    }
+
+    /**
+     * Test login failure with invalid credentials.
+     */
+    public function test_user_cannot_login_with_invalid_credentials(): void
+    {
+        User::factory()->create([
+            'email' => 'budi@kantor.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => 'budi@kantor.com',
+            'password' => 'wrongpassword',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['credentials']);
+    }
+
+    /**
+     * Test login failure with non-existent email.
+     */
+    public function test_user_cannot_login_with_non_existent_email(): void
+    {
+        $response = $this->postJson('/api/login', [
+            'email' => 'nonexistent@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['credentials']);
+    }
+
+    /**
+     * Test accessing protected route without token.
+     */
+    public function test_cannot_access_protected_route_without_token(): void
+    {
+        $response = $this->getJson('/api/users/current');
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * Test getting current user profile.
+     */
+    public function test_user_can_get_current_profile(): void
+    {
+        $user = User::factory()->create([
+            'position' => 'Staff IT',
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/users/current');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.email', $user->email)
+            ->assertJsonPath('data.position', 'Staff IT');
+    }
+
+    /**
+     * Test logout.
+     */
+    public function test_user_can_logout(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/logout');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+        
+        $this->assertCount(0, $user->tokens);
+    }
+}
