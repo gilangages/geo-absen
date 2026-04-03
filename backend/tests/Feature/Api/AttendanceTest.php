@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api;
 
 use App\Models\Attendance;
+use App\Models\Office;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,6 +21,15 @@ class AttendanceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Buat data kantor agar geofencing lolos saat testing
+        Office::create([
+            'name' => 'Kantor Test',
+            'latitude' => '-6.200000',
+            'longitude' => '106.816666',
+            'radius' => 100,
+        ]);
+
         $this->user = User::factory()->create();
         Sanctum::actingAs($this->user);
         Storage::fake('public');
@@ -47,8 +57,8 @@ class AttendanceTest extends TestCase
             'user_id' => $this->user->id,
             'date' => Carbon::today()->toDateString(),
         ]);
-        
-        Storage::disk('public')->assertExists('attendances/' . $file->hashName());
+
+        Storage::disk('public')->assertExists('attendances/'.$file->hashName());
     }
 
     /**
@@ -80,7 +90,7 @@ class AttendanceTest extends TestCase
             ->first();
 
         $this->assertNotNull($attendance->check_out_time);
-        Storage::disk('public')->assertExists('attendances/' . $file->hashName());
+        Storage::disk('public')->assertExists('attendances/'.$file->hashName());
     }
 
     /**

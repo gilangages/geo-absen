@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Models\Office;
 use App\Models\User;
 use App\Services\AttendanceService;
 use Carbon\Carbon;
@@ -15,14 +16,24 @@ class AttendanceServiceTest extends TestCase
     use RefreshDatabase;
 
     protected AttendanceService $service;
+
     protected User $user;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new AttendanceService();
+        // Gunakan Service Container agar OfficeService otomatis ter-inject
+        $this->service = app(AttendanceService::class);
         $this->user = User::factory()->create();
         Storage::fake('public');
+
+        // Buat data kantor dummy untuk bypass geofencing di unit test ini
+        Office::create([
+            'name' => 'Kantor Test',
+            'latitude' => '0',
+            'longitude' => '0',
+            'radius' => 1000, // Radius besar agar koordinat 0,0 selalu masuk
+        ]);
     }
 
     /**
@@ -39,7 +50,7 @@ class AttendanceServiceTest extends TestCase
             'foto_selfie' => UploadedFile::fake()->image('selfie.jpg'),
         ];
 
-        $result = $this->service->store($this->user, $data);
+        $this->service->store($this->user, $data);
 
         $this->assertDatabaseHas('attendances', [
             'user_id' => $this->user->id,
@@ -61,7 +72,7 @@ class AttendanceServiceTest extends TestCase
             'foto_selfie' => UploadedFile::fake()->image('selfie.jpg'),
         ];
 
-        $result = $this->service->store($this->user, $data);
+        $this->service->store($this->user, $data);
 
         $this->assertDatabaseHas('attendances', [
             'user_id' => $this->user->id,
