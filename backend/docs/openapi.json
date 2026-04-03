@@ -24,7 +24,7 @@
     }
   },
   "paths": {
-    "/api/login": {
+    "/api/auth/login": {
       "post": {
         "summary": "Login Karyawan",
         "description": "Untuk karyawan login menggunakan email dan password. Return: Token Sanctum yang akan disimpan di device (Flutter) untuk mengakses API lainnya.",
@@ -90,8 +90,8 @@
         }
       }
     },
-    "/api/logout": {
-      "post": {
+    "/api/auth/logout": {
+      "delete": {
         "summary": "Logout",
         "description": "Untuk logout. Ini sangat penting untuk menghapus/mencabut token aktif di database Laravel agar tidak disalahgunakan.",
         "tags": [

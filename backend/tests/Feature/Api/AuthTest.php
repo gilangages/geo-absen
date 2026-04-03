@@ -23,7 +23,7 @@ class AuthTest extends TestCase
             'position' => 'Staff IT',
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'budi@kantor.com',
             'password' => 'password123',
         ]);
@@ -50,7 +50,7 @@ class AuthTest extends TestCase
             'password' => Hash::make('password123'),
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'budi@kantor.com',
             'password' => 'wrongpassword',
         ]);
@@ -64,7 +64,7 @@ class AuthTest extends TestCase
      */
     public function test_user_cannot_login_with_non_existent_email(): void
     {
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'nonexistent@example.com',
             'password' => 'password123',
         ]);
@@ -109,11 +109,11 @@ class AuthTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/logout');
+        $response = $this->deleteJson('/api/auth/logout');
 
         $response->assertStatus(200)
             ->assertJsonPath('success', true);
-        
+
         $this->assertCount(0, $user->tokens);
     }
 }
