@@ -29,6 +29,9 @@ class DashboardViewModel extends ChangeNotifier {
   String? _successMessage;
   String? get successMessage => _successMessage;
 
+  bool _isOutOfRadiusError = false;
+  bool get isOutOfRadiusError => _isOutOfRadiusError;
+
   /// Mengambil status absensi hari ini dari server.
   Future<void> fetchTodayStatus() async {
     _isLoading = true;
@@ -62,6 +65,7 @@ class DashboardViewModel extends ChangeNotifier {
     _isSubmitting = true;
     _errorMessage = null;
     _successMessage = null;
+    _isOutOfRadiusError = false;
     notifyListeners();
 
     final response = await _attendanceApi.submitAttendance(
@@ -81,9 +85,15 @@ class DashboardViewModel extends ChangeNotifier {
       return true;
     } else {
       final errors = response['errors'];
-      if (errors != null && errors.isNotEmpty) {
+      if (errors != null && errors is Map && errors.isNotEmpty) {
         final firstKey = errors.keys.first;
-        _errorMessage = errors[firstKey][0];
+        final firstMessage = errors[firstKey][0] as String;
+        _errorMessage = firstMessage;
+
+        // Deteksi error geofencing (di luar radius kantor)
+        if (firstMessage.toLowerCase().contains('radius')) {
+          _isOutOfRadiusError = true;
+        }
       } else {
         _errorMessage = response['message'] ?? 'Gagal melakukan absensi.';
       }
