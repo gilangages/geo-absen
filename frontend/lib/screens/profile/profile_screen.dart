@@ -69,13 +69,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profil Saya'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () async {
+              final userData = {
+                'name': _viewModel.name,
+                'email': _viewModel.email,
+                'position': _viewModel.position,
+                'avatar_url': _viewModel.avatarUrl,
+              };
+              final updated = await context.push('/profile/edit', extra: userData);
+              if (updated == true) {
+                _viewModel.fetchProfile();
+              }
+            },
+            tooltip: 'Edit Profil',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: _viewModel.isLoading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
+            : Builder(
+                builder: (context) {
+                  final colorScheme = Theme.of(context).colorScheme;
+                  return SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
@@ -160,8 +184,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-              ),
+              );
+            },
+          ),
       ),
+      backgroundColor: Colors.white,
       bottomNavigationBar: NavigationBar(
         selectedIndex: 2, // Tab Profil aktif
         onDestinationSelected: (index) {

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Geo Absen API",
-    "description": "API Documentation untuk aplikasi Absensi Karyawan (Backend Laravel & Frontend Flutter). \n\n**Catatan Penting untuk Frontend Flutter:**\n1. Pastikan selalu mengirim header `Accept: application/json` pada setiap request API agar jika terjadi error, response akan selalu dalam bentuk JSON (bukan redirect ke halaman web login).\n2. Untuk endpoint yang terkunci, Flutter harus mengirim token di header: `Authorization: Bearer <token_aktif>`.\n3. Khusus untuk endpoint `POST /api/attendances` dan `POST /api/leaves`, karena mengirimkan file (foto), pastikan menggunakan `Content-Type: multipart/form-data` dari sisi Flutter.",
+    "description": "API Documentation untuk aplikasi Absensi Karyawan (Backend Laravel & Frontend Flutter). \n\n**Catatan Penting untuk Frontend Flutter:**\n1. Pastikan selalu mengirim header `Accept: application/json` pada setiap request API agar jika terjadi error, response akan selalu dalam bentuk JSON (bukan redirect ke halaman web login).\n2. Untuk endpoint yang terkunci, Flutter harus mengirim token di header: `Authorization: Bearer <token_aktif>`.\n3. Khusus untuk endpoint `POST /api/attendances`, `POST /api/leaves`, dan `PATCH /api/users/current`, karena mengirimkan file (foto), pastikan menggunakan `Content-Type: multipart/form-data` dari sisi Flutter.",
     "version": "1.0.0",
     "contact": {
       "name": "Gilang Abdian Anggara",
@@ -27,7 +27,6 @@
     "/api/auth/register": {
       "post": {
         "summary": "Pendaftaran Karyawan Baru (Demo)",
-        "description": "Untuk mendaftarkan akun karyawan baru agar bisa mencoba fitur aplikasi secara personal.",
         "tags": [
           "Auth & User"
         ],
@@ -38,24 +37,19 @@
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string",
-                    "example": "Karyawan Demo"
+                    "type": "string"
                   },
                   "email": {
-                    "type": "string",
-                    "example": "karyawan@demo.com"
+                    "type": "string"
                   },
                   "password": {
-                    "type": "string",
-                    "example": "password123"
+                    "type": "string"
                   },
                   "password_confirmation": {
-                    "type": "string",
-                    "example": "password123"
+                    "type": "string"
                   },
                   "position": {
-                    "type": "string",
-                    "example": "Staff Marketing"
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -70,36 +64,7 @@
         },
         "responses": {
           "201": {
-            "description": "Pendaftaran berhasil.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Pendaftaran berhasil, silakan login.",
-                  "data": {
-                    "id": 10,
-                    "name": "Karyawan Demo",
-                    "email": "karyawan@demo.com"
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validasi gagal (Contoh: Email sudah terdaftar).",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Data pendaftaran tidak valid.",
-                  "errors": {
-                    "email": [
-                      "Email ini sudah terdaftar."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       }
@@ -107,7 +72,6 @@
     "/api/auth/login": {
       "post": {
         "summary": "Login Karyawan",
-        "description": "Untuk karyawan login menggunakan email dan password. Return: Token Sanctum yang akan disimpan di device (Flutter) untuk mengakses API lainnya.",
         "tags": [
           "Auth & User"
         ],
@@ -118,12 +82,10 @@
                 "type": "object",
                 "properties": {
                   "email": {
-                    "type": "string",
-                    "example": "budi@kantor.com"
+                    "type": "string"
                   },
                   "password": {
-                    "type": "string",
-                    "example": "password123"
+                    "type": "string"
                   }
                 }
               }
@@ -132,40 +94,7 @@
         },
         "responses": {
           "200": {
-            "description": "Login berhasil.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Login berhasil.",
-                  "data": {
-                    "token": "1|LaravelSanctumTokenPanjang...",
-                    "user": {
-                      "id": 1,
-                      "name": "Budi Santoso",
-                      "email": "budi@kantor.com",
-                      "position": "Staff IT"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Login gagal (Error Validasi / Salah Password).",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Login gagal, periksa kembali kredensial Anda.",
-                  "errors": {
-                    "credentials": [
-                      "Email atau password yang Anda masukkan salah."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       }
@@ -173,7 +102,6 @@
     "/api/auth/logout": {
       "delete": {
         "summary": "Logout",
-        "description": "Untuk logout. Ini sangat penting untuk menghapus/mencabut token aktif di database Laravel agar tidak disalahgunakan.",
         "tags": [
           "Auth & User"
         ],
@@ -184,32 +112,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Berhasil logout.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Berhasil logout.",
-                  "data": null
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error Sesi Habis / Token Invalid",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Akses ditolak.",
-                  "errors": {
-                    "auth": [
-                      "Sesi telah habis, silakan login kembali."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       }
@@ -217,7 +120,7 @@
     "/api/users/current": {
       "get": {
         "summary": "Data Profil Karyawan",
-        "description": "Mengambil data profil karyawan yang sedang login (nama, posisi, foto profil).",
+        "description": "Mengambil data profil karyawan yang sedang login.",
         "tags": [
           "Auth & User"
         ],
@@ -228,33 +131,89 @@
         ],
         "responses": {
           "200": {
-            "description": "Data profil berhasil diambil.",
+            "description": "Data profil berhasil diambil."
+          }
+        }
+      },
+      "post": {
+        "summary": "Update Profil Karyawan (PATCH Spoofing)",
+        "description": "Mengupdate data diri karyawan. Karena menyertakan file (avatar), Flutter HARUS menggunakan method POST namun menambahkan field `_method: PATCH` di dalam FormData.",
+        "tags": [
+          "Auth & User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_method": {
+                    "type": "string",
+                    "example": "PATCH",
+                    "description": "Wajib diisi 'PATCH' agar Laravel mengenali ini sebagai request update."
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Budi Santoso"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "budi@kantor.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Opsional, isi jika ingin ganti password."
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "description": "Wajib diisi jika password diisi."
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Opsional, file gambar foto profil baru."
+                  }
+                },
+                "required": [
+                  "_method"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil berhasil diperbarui.",
             "content": {
               "application/json": {
                 "example": {
                   "success": true,
-                  "message": "Data profil berhasil diambil.",
+                  "message": "Profil berhasil diperbarui.",
                   "data": {
                     "id": 1,
-                    "name": "Budi Santoso",
+                    "name": "Budi Santoso Baru",
                     "email": "budi@kantor.com",
-                    "position": "Staff IT",
-                    "avatar_url": "https://domainkamu.com/storage/avatars/budi.jpg"
+                    "avatar_url": "https://..."
                   }
                 }
               }
             }
           },
-          "401": {
-            "description": "Error Sesi Habis / Token Invalid",
+          "422": {
+            "description": "Validasi gagal.",
             "content": {
               "application/json": {
                 "example": {
                   "success": false,
-                  "message": "Akses ditolak.",
+                  "message": "Data tidak valid.",
                   "errors": {
-                    "auth": [
-                      "Sesi telah habis, silakan login kembali."
+                    "email": [
+                      "Email sudah digunakan oleh orang lain."
                     ]
                   }
                 }
@@ -267,7 +226,6 @@
     "/api/attendances": {
       "get": {
         "summary": "Riwayat Absensi",
-        "description": "Mengambil riwayat absensi karyawan tersebut. Default hanya mengambil data absensi pada bulan berjalan.",
         "tags": [
           "Attendances"
         ],
@@ -276,73 +234,14 @@
             "bearerAuth": []
           }
         ],
-        "parameters": [
-          {
-            "name": "month",
-            "in": "query",
-            "description": "Filter bulan (Opsional, misal: 04)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "year",
-            "in": "query",
-            "description": "Filter tahun (Opsional, misal: 2026)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Riwayat absensi bulan ini berhasil diambil.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Riwayat absensi bulan ini berhasil diambil.",
-                  "data": [
-                    {
-                      "id": 105,
-                      "date": "2026-04-02",
-                      "check_in_time": "07:55:00",
-                      "check_out_time": null,
-                      "status": "present"
-                    },
-                    {
-                      "id": 104,
-                      "date": "2026-04-01",
-                      "check_in_time": "08:05:00",
-                      "check_out_time": "17:10:00",
-                      "status": "late"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error Sesi Habis / Token Invalid",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Akses ditolak.",
-                  "errors": {
-                    "auth": [
-                      "Sesi telah habis, silakan login kembali."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       },
       "post": {
         "summary": "Kirim Data Absensi",
-        "description": "Mengirim data absensi (check-in atau check-out). \n\n**Perhatian**: Karena request ini menyertakan file foto selfie, pastikan Content-Type yang digunakan adalah `multipart/form-data` bukan json.",
         "tags": [
           "Attendances"
         ],
@@ -351,124 +250,16 @@
             "bearerAuth": []
           }
         ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "description": "Isi dengan 'in' untuk absen masuk, atau 'out' untuk absen pulang",
-                    "example": "in"
-                  },
-                  "latitude": {
-                    "type": "string",
-                    "description": "String dari koordinat GPS pengguna",
-                    "example": "-6.200000"
-                  },
-                  "longitude": {
-                    "type": "string",
-                    "description": "String dari koordinat GPS pengguna",
-                    "example": "106.816666"
-                  },
-                  "foto_selfie": {
-                    "type": "string",
-                    "format": "binary",
-                    "description": "File gambar dari kamera HP (berupa file bytes asli, bukan base64)"
-                  }
-                },
-                "required": [
-                  "type",
-                  "latitude",
-                  "longitude",
-                  "foto_selfie"
-                ]
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
-            "description": "Berhasil melakukan absen.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Absensi berhasil dicatat.",
-                  "data": {
-                    "id": 105,
-                    "type": "in",
-                    "time": "2026-04-02 07:55:00",
-                    "latitude": "-6.200000",
-                    "longitude": "106.816666",
-                    "foto_url": "https://domainkamu.com/storage/attendances/selfie_105.jpg"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error Logika Bisnis (Contoh: sudah absen masuk lalu mencoba absen masuk kembali).",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Gagal melakukan absensi.",
-                  "errors": {
-                    "attendance": [
-                      "Anda sudah melakukan check-in hari ini."
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error Validasi (Contoh: data/lokasi kosong).",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Data absensi tidak lengkap.",
-                  "errors": {
-                    "latitude": [
-                      "Koordinat lokasi wajib diisi."
-                    ],
-                    "foto_selfie": [
-                      "Foto selfie wajib diunggah."
-                    ],
-                    "type": [
-                      "Jenis absen (in/out) tidak valid."
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error Sesi Habis / Token Invalid",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Akses ditolak.",
-                  "errors": {
-                    "auth": [
-                      "Sesi telah habis, silakan login kembali."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       }
     },
     "/api/attendances/today": {
       "get": {
-        "summary": "Cek Status Absen Hari Ini",
-        "description": "Mengecek status absen karyawan pada hari ini. Jika belum absen, Flutter akan menampilkan tombol masuk, dst.",
+        "summary": "Cek Status Hari Ini",
         "tags": [
           "Attendances"
         ],
@@ -479,41 +270,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Status absensi hari ini berhasil diambil.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Status absensi hari ini berhasil diambil.",
-                  "data": {
-                    "is_checked_in": true,
-                    "is_checked_out": false,
-                    "check_in_time": "07:55:00",
-                    "check_out_time": null,
-                    "work_start": "08:00:00",
-                    "work_end": "17:00:00",
-                    "is_on_leave": false,
-                    "leave_details": null
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error Sesi Habis / Token Invalid",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Akses ditolak.",
-                  "errors": {
-                    "auth": [
-                      "Sesi telah habis, silakan login kembali."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       }
@@ -521,7 +278,6 @@
     "/api/leaves": {
       "get": {
         "summary": "Riwayat Izin/Cuti",
-        "description": "Mengambil riwayat izin/cuti karyawan tersebut.",
         "tags": [
           "Leaves"
         ],
@@ -532,50 +288,12 @@
         ],
         "responses": {
           "200": {
-            "description": "Riwayat izin berhasil diambil.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Riwayat izin berhasil diambil.",
-                  "data": [
-                    {
-                      "id": 1,
-                      "type": "sakit",
-                      "start_date": "2026-04-05",
-                      "end_date": "2026-04-07",
-                      "reason": "Demam tinggi",
-                      "image_proof_url": "https://domainkamu.com/storage/leaves/proof_1.jpg",
-                      "status": "approved",
-                      "note_admin": null,
-                      "created_at": "2026-04-04 10:00:00"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error Sesi Habis / Token Invalid",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Akses ditolak.",
-                  "errors": {
-                    "auth": [
-                      "Sesi telah habis, silakan login kembali."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       },
       "post": {
         "summary": "Ajukan Izin/Cuti",
-        "description": "Mengirim pengajuan izin baru (sakit, izin, atau cuti). Membutuhkan upload foto bukti.",
         "tags": [
           "Leaves"
         ],
@@ -584,106 +302,9 @@
             "bearerAuth": []
           }
         ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "description": "Pilihan: sakit, izin, atau cuti",
-                    "example": "sakit",
-                    "enum": [
-                      "sakit",
-                      "izin",
-                      "cuti"
-                    ]
-                  },
-                  "start_date": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Tanggal mulai izin (YYYY-MM-DD)",
-                    "example": "2026-04-05"
-                  },
-                  "end_date": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Tanggal berakhir izin (YYYY-MM-DD)",
-                    "example": "2026-04-07"
-                  },
-                  "reason": {
-                    "type": "string",
-                    "description": "Alasan singkat pengajuan izin",
-                    "example": "Demam tinggi dan butuh istirahat"
-                  },
-                  "image_proof": {
-                    "type": "string",
-                    "format": "binary",
-                    "description": "File gambar bukti (surat dokter/surat izin)"
-                  }
-                },
-                "required": [
-                  "type",
-                  "start_date",
-                  "end_date",
-                  "reason",
-                  "image_proof"
-                ]
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
-            "description": "Pengajuan berhasil dikirim.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Pengajuan izin berhasil dikirim dan menunggu persetujuan Admin.",
-                  "data": {
-                    "id": 1,
-                    "status": "pending"
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error Validasi",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Data tidak lengkap.",
-                  "errors": {
-                    "start_date": [
-                      "Tanggal mulai wajib diisi."
-                    ],
-                    "image_proof": [
-                      "Foto bukti wajib diunggah."
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error Sesi Habis",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": false,
-                  "message": "Akses ditolak.",
-                  "errors": {
-                    "auth": [
-                      "Sesi telah habis, silakan login kembali."
-                    ]
-                  }
-                }
-              }
-            }
+            "description": "Berhasil."
           }
         }
       }

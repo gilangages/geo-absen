@@ -5,6 +5,7 @@ import '../../screens/register/register_screen.dart';
 import '../../screens/dashboard/dashboard_screen.dart';
 import '../../screens/history/history_screen.dart';
 import '../../screens/profile/profile_screen.dart';
+import '../../screens/profile/edit_profile_screen.dart';
 import '../../screens/leave/leave_form_screen.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -39,6 +40,14 @@ final GoRouter appRouter = GoRouter(
       path: '/profile',
       name: 'profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/profile/edit',
+      name: 'profile_edit',
+      builder: (context, state) {
+        final userData = state.extra as Map<String, dynamic>;
+        return EditProfileScreen(userData: userData);
+      },
     ),
     GoRoute(
       path: '/leave/form',
