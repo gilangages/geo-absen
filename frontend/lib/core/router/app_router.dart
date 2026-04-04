@@ -4,6 +4,7 @@ import '../../screens/login/login_screen.dart';
 import '../../screens/dashboard/dashboard_screen.dart';
 import '../../screens/history/history_screen.dart';
 import '../../screens/profile/profile_screen.dart';
+import '../../screens/leave/leave_form_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -32,6 +33,11 @@ final GoRouter appRouter = GoRouter(
       path: '/profile',
       name: 'profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/leave/form',
+      name: 'leave_form',
+      builder: (context, state) => const LeaveFormScreen(),
     ),
   ],
 );

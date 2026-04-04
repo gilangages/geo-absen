@@ -39,4 +39,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
+
+    /**
+     * Get the leaves for the user.
+     */
+    public function leaves(): HasMany
+    {
+        return $this->hasMany(Leave::class);
+    }
 }

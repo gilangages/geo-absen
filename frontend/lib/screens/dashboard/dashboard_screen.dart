@@ -322,18 +322,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 48),
 
                       // Tombol Raksasa Check In / Check Out
-                      Center(child: _buildAttendanceButton(colorScheme)),
+                      if (_viewModel.isOnLeave)
+                        _buildLeaveBanner(colorScheme)
+                      else ...[
+                        Center(child: _buildAttendanceButton(colorScheme)),
+                        const SizedBox(height: 16),
+                        // Status text di bawah tombol
+                        Center(
+                          child: Text(
+                            _getStatusLabel(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: Colors.black54),
+                          ),
+                        ),
+                      ],
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 48),
 
-                      // Status text di bawah tombol
-                      Center(
-                        child: Text(
-                          _getStatusLabel(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: Colors.black54),
+                      // Tombol Pengajuan Izin
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => context.push('/leave/form'),
+                          icon: const Icon(Icons.edit_document),
+                          label: const Text('Pengajuan Izin / Cuti'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -387,6 +407,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } else {
       return 'Kamu sudah lengkap absen hari ini ✅';
     }
+  }
+
+  Widget _buildLeaveBanner(ColorScheme colorScheme) {
+    final type = _viewModel.leaveDetails?['type'] ?? 'Izin/Cuti';
+    final typeCapitalized = type.toString().replaceFirst(type.toString()[0], type.toString()[0].toUpperCase());
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.3), width: 2),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.event_available_rounded, size: 64, color: colorScheme.primary),
+          const SizedBox(height: 16),
+          Text(
+            'Sedang $typeCapitalized',
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Anda sedang dalam masa izin/cuti. Tombol absensi dinonaktifkan hari ini.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.black54),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildAttendanceButton(ColorScheme colorScheme) {
