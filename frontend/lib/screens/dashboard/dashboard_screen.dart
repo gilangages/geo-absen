@@ -293,7 +293,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 32),
+                      Center(child: _buildCountdown(colorScheme)),
+                      const SizedBox(height: 24),
+
+                      // Jam Kerja Card
+                      _buildWorkHoursCard(colorScheme),
+                      const SizedBox(height: 24),
 
                       // Status Cards
                       Row(
@@ -479,7 +484,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               : [
                   BoxShadow(
                     color: bgColor.withOpacity(0.4),
-                    blurRadius: 24,
+                    blurRadius: 20,
                     spreadRadius: 4,
                     offset: const Offset(0, 8),
                   ),
@@ -487,12 +492,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         child: _viewModel.isSubmitting
             ? const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
               )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 56, color: Colors.white),
+                  Icon(icon, size: 64, color: Colors.white),
                   const SizedBox(height: 8),
                   Text(
                     label,
@@ -504,6 +511,185 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildCountdown(ColorScheme colorScheme) {
+    if (_viewModel.workStart == null) return const SizedBox.shrink();
+
+    // 1. Jika belum absen MASUK
+    if (!_viewModel.isCheckedIn) {
+      final parts = _viewModel.workStart!.split(':');
+      if (parts.length >= 2) {
+        final hour = int.tryParse(parts[0]) ?? 8;
+        final minute = int.tryParse(parts[1]) ?? 0;
+        final workStartDt = DateTime(_now.year, _now.month, _now.day, hour, minute);
+        
+        final diff = workStartDt.difference(_now);
+        
+        if (diff.isNegative) {
+          // Terlambat
+          final lateMinutes = diff.abs().inMinutes;
+          if (lateMinutes < 1440) {
+            final isHours = lateMinutes >= 60;
+            final timeText = isHours 
+                ? '${diff.abs().inHours} jam ${lateMinutes % 60} menit'
+                : '$lateMinutes menit';
+
+            return Container(
+              margin: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Aduh, kamu terlambat $timeText!',
+                    style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            );
+          }
+        } else {
+          // Belum terlambat (misal < 120 menit sebelumnya)
+          final minutesLeft = diff.inMinutes;
+          if (minutesLeft <= 120) {
+            return Container(
+              margin: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.timer_outlined, color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Kamu punya $minutesLeft menit lagi untuk absen!',
+                    style: TextStyle(color: Colors.orange.shade700, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            );
+          }
+        }
+      }
+    } 
+    // 2. Jika SUDAH Masuk tapi BELUM Pulang
+    else if (!_viewModel.isCheckedOut && _viewModel.workEnd != null) {
+      final parts = _viewModel.workEnd!.split(':');
+      if (parts.length >= 2) {
+        final hour = int.tryParse(parts[0]) ?? 17;
+        final minute = int.tryParse(parts[1]) ?? 0;
+        final workEndDt = DateTime(_now.year, _now.month, _now.day, hour, minute);
+        
+        final diff = workEndDt.difference(_now);
+        
+        if (diff.isNegative) {
+          // Sudah waktunya pulang
+          return Container(
+            margin: const EdgeInsets.only(top: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.directions_run_rounded, color: Colors.green.shade700, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Waktunya pulang! Jangan lupa absen ya 🎉',
+                  style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Masih jam kerja
+          final hoursLeft = diff.inHours;
+          final minutesLeft = diff.inMinutes % 60;
+          final timeText = hoursLeft > 0 
+              ? '$hoursLeft jam $minutesLeft mnt'
+              : '$minutesLeft mnt';
+
+          return Container(
+            margin: const EdgeInsets.only(top: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.work_outline, color: Colors.blue.shade700, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Sisa jam kerja: $timeText',
+                  style: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
+    
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildWorkHoursCard(ColorScheme colorScheme) {
+    if (_viewModel.workStart == null || _viewModel.workEnd == null) return const SizedBox.shrink();
+
+    // Format if it has seconds "08:00:00" -> "08:00"
+    final start = _viewModel.workStart!.length >= 5 ? _viewModel.workStart!.substring(0, 5) : _viewModel.workStart;
+    final end = _viewModel.workEnd!.length >= 5 ? _viewModel.workEnd!.substring(0, 5) : _viewModel.workEnd;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withAlpha(50),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.primary.withAlpha(50)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.access_time_rounded, color: colorScheme.primary),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Jam Kerja Hari Ini',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Text(
+            '$start - $end',
+            style: TextStyle(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ],
       ),
     );
   }

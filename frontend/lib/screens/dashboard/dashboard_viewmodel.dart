@@ -23,6 +23,12 @@ class DashboardViewModel extends ChangeNotifier {
   String? _checkOutTime;
   String? get checkOutTime => _checkOutTime;
 
+  String? _workStart;
+  String? get workStart => _workStart;
+
+  String? _workEnd;
+  String? get workEnd => _workEnd;
+
   bool _isOnLeave = false;
   bool get isOnLeave => _isOnLeave;
 
@@ -52,6 +58,8 @@ class DashboardViewModel extends ChangeNotifier {
       _isCheckedOut = data['is_checked_out'] ?? false;
       _checkInTime = data['check_in_time'];
       _checkOutTime = data['check_out_time'];
+      _workStart = data['work_start'];
+      _workEnd = data['work_end'];
       _isOnLeave = data['is_on_leave'] ?? false;
       _leaveDetails = data['leave_details'];
     } else if (response['status_code'] == 401) {

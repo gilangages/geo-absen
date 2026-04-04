@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Leaves;
 
 use App\Filament\Resources\Leaves\Pages\CreateLeave;
-use App\Filament\Resources\Leaves\Pages\EditLeave;
 use App\Filament\Resources\Leaves\Pages\ListLeaves;
 use App\Filament\Resources\Leaves\Pages\ViewLeave;
 use App\Filament\Resources\Leaves\Schemas\LeaveForm;
@@ -57,7 +56,6 @@ class LeaveResource extends Resource
             'index' => ListLeaves::route('/'),
             'create' => CreateLeave::route('/create'),
             'view' => ViewLeave::route('/{record}'),
-            'edit' => EditLeave::route('/{record}/edit'),
         ];
     }
 }

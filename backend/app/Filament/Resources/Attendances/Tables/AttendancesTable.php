@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\Attendances\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -38,8 +39,24 @@ class AttendancesTable
                     ->sortable(),
                 ImageColumn::make('check_in_foto')
                     ->label('Foto Masuk')
-                    ->disk('public') // Explicitly use public disk
-                    ->circular(),
+                    ->disk('public')
+                    ->circular()
+                    ->action(
+                        Action::make('preview_in')
+                            ->modalHeading('Preview Foto Masuk')
+                            ->modalSubmitAction(false)
+                            ->modalCancelActionLabel('Tutup')
+                            ->schema([
+                                ImageEntry::make('check_in_foto')
+                                    ->label('')
+                                    ->disk('public')
+                                    ->width('100%')
+                                    ->height('auto') // Biar tingginya mengikuti asli
+                                    ->extraImgAttributes([
+                                        'style' => 'object-fit: contain; max-height: 80vh; width: 100%;',
+                                    ]), // object-fit: contain agar tidak kepotong
+                            ])
+                    ),
                 TextColumn::make('check_out_time')
                     ->label('Pulang')
                     ->time()
@@ -47,8 +64,24 @@ class AttendancesTable
                     ->placeholder('-'),
                 ImageColumn::make('check_out_foto')
                     ->label('Foto Pulang')
-                    ->disk('public') // Explicitly use public disk
-                    ->circular(),
+                    ->disk('public')
+                    ->circular()
+                    ->action(
+                        Action::make('preview_out')
+                            ->modalHeading('Preview Foto Pulang')
+                            ->modalSubmitAction(false)
+                            ->modalCancelActionLabel('Tutup')
+                            ->schema([
+                                ImageEntry::make('check_out_foto')
+                                    ->label('')
+                                    ->disk('public')
+                                    ->width('100%')
+                                    ->height('auto')
+                                    ->extraImgAttributes([
+                                        'style' => 'object-fit: contain; max-height: 80vh; width: 100%;',
+                                    ]),
+                            ])
+                    ),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -66,7 +99,6 @@ class AttendancesTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
