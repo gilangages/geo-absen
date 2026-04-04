@@ -9,6 +9,19 @@ use Illuminate\Validation\ValidationException;
 class AuthService
 {
     /**
+     * Daftarkan user baru (khusus untuk mode demo/portofolio).
+     */
+    public function register(array $data): User
+    {
+        return User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'position' => $data['position'],
+        ]);
+    }
+
+    /**
      * Authenticate a user and return a token.
      *
      * @param  array<string, string>  $credentials

@@ -19,10 +19,14 @@ class OfficesTable
                     ->label('Nama Kantor')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('latitude')
-                    ->label('Latitude'),
-                TextColumn::make('longitude')
-                    ->label('Longitude'),
+                TextColumn::make('work_start')
+                    ->label('Jam Masuk')
+                    ->time()
+                    ->sortable(),
+                TextColumn::make('work_end')
+                    ->label('Jam Pulang')
+                    ->time()
+                    ->sortable(),
                 TextColumn::make('radius')
                     ->label('Radius')
                     ->suffix(' Meter')
@@ -31,7 +35,8 @@ class OfficesTable
                 TextColumn::make('updated_at')
                     ->label('Terakhir Diupdate')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

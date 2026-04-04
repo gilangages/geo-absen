@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Offices\Schemas;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -38,6 +39,21 @@ class OfficeForm
                             ->suffix('Meter')
                             ->helperText('Karyawan hanya bisa absen jika berada dalam radius ini dari kantor.')
                             ->default(100),
+                    ])->columns(2),
+
+                Section::make('Jam Kerja')
+                    ->description('Tentukan batas waktu masuk dan pulang kantor.')
+                    ->schema([
+                        TimePicker::make('work_start')
+                            ->label('Jam Masuk')
+                            ->required()
+                            ->default('08:00:00')
+                            ->helperText('Setelah jam ini, karyawan akan dianggap Terlambat.'),
+
+                        TimePicker::make('work_end')
+                            ->label('Jam Pulang')
+                            ->required()
+                            ->default('17:00:00'),
                     ])->columns(2),
             ]);
     }

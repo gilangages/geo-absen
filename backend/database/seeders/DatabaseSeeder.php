@@ -13,9 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Membuat Akun Admin Utama
+        // 1. Membuat Akun Admin Utama (Ambil dari .env)
         User::updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@gmail.com')],
+            ['email' => env('ADMIN_EMAIL', 'admin@admin.com')],
             [
                 'name' => 'Admin Utama',
                 'password' => Hash::make(env('ADMIN_PASS', 'password')),
@@ -24,7 +24,20 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Jika ingin membuat beberapa user dummy untuk testing, bisa aktifkan baris bawah ini:
-        // User::factory(5)->create();
+        // 2. Membuat Akun Karyawan Demo (Siap Pakai untuk Portofolio)
+        User::updateOrCreate(
+            ['email' => 'karyawan@demo.com'],
+            [
+                'name' => 'Karyawan Demo',
+                'password' => Hash::make('karyawan123'),
+                'position' => 'Staff Marketing',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // 3. Membuat Data Lokasi Kantor Default (Radius Dunia)
+        $this->call([
+            OfficeSeeder::class,
+        ]);
     }
 }

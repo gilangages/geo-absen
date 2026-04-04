@@ -24,6 +24,86 @@
     }
   },
   "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Pendaftaran Karyawan Baru (Demo)",
+        "description": "Untuk mendaftarkan akun karyawan baru agar bisa mencoba fitur aplikasi secara personal.",
+        "tags": [
+          "Auth & User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Karyawan Demo"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "karyawan@demo.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "position": {
+                    "type": "string",
+                    "example": "Staff Marketing"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password",
+                  "position"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pendaftaran berhasil.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Pendaftaran berhasil, silakan login.",
+                  "data": {
+                    "id": 10,
+                    "name": "Karyawan Demo",
+                    "email": "karyawan@demo.com"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal (Contoh: Email sudah terdaftar).",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Data pendaftaran tidak valid.",
+                  "errors": {
+                    "email": [
+                      "Email ini sudah terdaftar."
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/login": {
       "post": {
         "summary": "Login Karyawan",
@@ -410,6 +490,8 @@
                     "is_checked_out": false,
                     "check_in_time": "07:55:00",
                     "check_out_time": null,
+                    "work_start": "08:00:00",
+                    "work_end": "17:00:00",
                     "is_on_leave": false,
                     "leave_details": null
                   }

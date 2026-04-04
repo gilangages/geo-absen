@@ -41,6 +41,9 @@ class AttendanceService
             ]);
         }
 
+        // Ambil data kantor untuk cek jam kerja
+        $office = $this->officeService->getOffice();
+
         // Get existing record for today
         $attendance = Attendance::where('user_id', $user->id)
             ->where('date', $today)
@@ -55,6 +58,12 @@ class AttendanceService
 
             $path = $data['foto_selfie']->store('attendances', 'public');
 
+            // Logika penentuan status (terlambat jika lewat dari work_start)
+            $status = 'present';
+            if ($office && $now->toTimeString() > $office->work_start) {
+                $status = 'late';
+            }
+
             $attendance = Attendance::create([
                 'user_id' => $user->id,
                 'date' => $today,
@@ -62,7 +71,7 @@ class AttendanceService
                 'check_in_latitude' => $data['latitude'],
                 'check_in_longitude' => $data['longitude'],
                 'check_in_foto' => $path,
-                'status' => $now->hour >= 8 ? 'late' : 'present', // Example logic: late after 08:00
+                'status' => $status,
             ]);
 
             return $this->formatResponse($attendance, 'in');
@@ -109,12 +118,15 @@ class AttendanceService
             ->first();
 
         $leave = $this->leaveService->isCurrentlyOnLeave($user);
+        $office = $this->officeService->getOffice();
 
         return [
             'is_checked_in' => (bool) $attendance,
             'is_checked_out' => $attendance && (bool) $attendance->check_out_time,
             'check_in_time' => $attendance ? $attendance->check_in_time : null,
             'check_out_time' => ($attendance && $attendance->check_out_time) ? $attendance->check_out_time : null,
+            'work_start' => $office ? $office->work_start : '08:00:00',
+            'work_end' => $office ? $office->work_end : '17:00:00',
             'is_on_leave' => (bool) $leave,
             'leave_details' => $leave ? [
                 'type' => $leave->type,

@@ -13,6 +13,48 @@ class AuthTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * Test successful registration.
+     */
+    public function test_user_can_register(): void
+    {
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Karyawan Demo',
+            'email' => 'karyawan@demo.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'position' => 'Staff Marketing',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.email', 'karyawan@demo.com');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'karyawan@demo.com',
+            'position' => 'Staff Marketing',
+        ]);
+    }
+
+    /**
+     * Test registration failure with existing email.
+     */
+    public function test_user_cannot_register_with_existing_email(): void
+    {
+        User::factory()->create(['email' => 'karyawan@demo.com']);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Karyawan Demo',
+            'email' => 'karyawan@demo.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'position' => 'Staff Marketing',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+    }
+
+    /**
      * Test successful login.
      */
     public function test_user_can_login_with_valid_credentials(): void
