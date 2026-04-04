@@ -14,6 +14,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User / Auth
     Route::delete('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/users/current', [AuthController::class, 'current']);
+    Route::patch('/users/current', [AuthController::class, 'updateProfile']);
 
     // Attendances
     Route::get('/attendances', [AttendanceController::class, 'index']);

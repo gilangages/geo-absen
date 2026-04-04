@@ -4,7 +4,9 @@ namespace Tests\Feature\Api;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -87,7 +89,7 @@ class AuthTest extends TestCase
      */
     public function test_user_cannot_login_with_invalid_credentials(): void
     {
-        User::factory()->create([
+        $user = User::factory()->create([
             'email' => 'budi@kantor.com',
             'password' => Hash::make('password123'),
         ]);
@@ -141,6 +143,74 @@ class AuthTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonPath('data.email', $user->email)
             ->assertJsonPath('data.position', 'Staff IT');
+    }
+
+    /**
+     * Test user can update profile name and email.
+     */
+    public function test_user_can_update_profile_info(): void
+    {
+        $user = User::factory()->create(['name' => 'Old Name']);
+        Sanctum::actingAs($user);
+
+        $response = $this->patchJson('/api/users/current', [
+            'name' => 'New Name',
+            'email' => 'newemail@example.com',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.name', 'New Name')
+            ->assertJsonPath('data.email', 'newemail@example.com');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'New Name',
+        ]);
+    }
+
+    /**
+     * Test user can update avatar.
+     */
+    public function test_user_can_update_avatar(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $file = UploadedFile::fake()->image('new_avatar.jpg');
+
+        $response = $this->patchJson('/api/users/current', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $file,
+        ]);
+
+        $response->assertStatus(200);
+
+        $user->refresh();
+        $this->assertNotNull($user->avatar);
+        Storage::disk('public')->assertExists($user->avatar);
+    }
+
+    /**
+     * Test user can update password.
+     */
+    public function test_user_can_update_password(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->patchJson('/api/users/current', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $response->assertStatus(200);
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('newpassword123', $user->password));
     }
 
     /**
