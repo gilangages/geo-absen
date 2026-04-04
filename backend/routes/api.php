@@ -17,4 +17,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/attendances', [AttendanceController::class, 'index']);
     Route::post('/attendances', [AttendanceController::class, 'store']);
     Route::get('/attendances/today', [AttendanceController::class, 'today']);
+
+    // Leaves
+    Route::get('/leaves', [\App\Http\Controllers\Api\LeaveController::class, 'index']);
+    Route::post('/leaves', [\App\Http\Controllers\Api\LeaveController::class, 'store']);
 });

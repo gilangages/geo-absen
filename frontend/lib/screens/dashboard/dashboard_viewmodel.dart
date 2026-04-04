@@ -23,6 +23,12 @@ class DashboardViewModel extends ChangeNotifier {
   String? _checkOutTime;
   String? get checkOutTime => _checkOutTime;
 
+  bool _isOnLeave = false;
+  bool get isOnLeave => _isOnLeave;
+
+  Map<String, dynamic>? _leaveDetails;
+  Map<String, dynamic>? get leaveDetails => _leaveDetails;
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
@@ -46,6 +52,8 @@ class DashboardViewModel extends ChangeNotifier {
       _isCheckedOut = data['is_checked_out'] ?? false;
       _checkInTime = data['check_in_time'];
       _checkOutTime = data['check_out_time'];
+      _isOnLeave = data['is_on_leave'] ?? false;
+      _leaveDetails = data['leave_details'];
     } else if (response['status_code'] == 401) {
       _errorMessage = 'Sesi habis, silakan login kembali.';
     }

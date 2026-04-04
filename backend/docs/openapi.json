@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Geo Absen API",
-    "description": "API Documentation untuk aplikasi Absensi Karyawan (Backend Laravel & Frontend Flutter). \n\n**Catatan Penting untuk Frontend Flutter:**\n1. Pastikan selalu mengirim header `Accept: application/json` pada setiap request API agar jika terjadi error, response akan selalu dalam bentuk JSON (bukan redirect ke halaman web login).\n2. Untuk endpoint yang terkunci, Flutter harus mengirim token di header: `Authorization: Bearer <token_aktif>`.\n3. Khusus untuk endpoint `POST /api/attendances`, karena mengirimkan file (foto), pastikan menggunakan `Content-Type: multipart/form-data` dari sisi Flutter.",
+    "description": "API Documentation untuk aplikasi Absensi Karyawan (Backend Laravel & Frontend Flutter). \n\n**Catatan Penting untuk Frontend Flutter:**\n1. Pastikan selalu mengirim header `Accept: application/json` pada setiap request API agar jika terjadi error, response akan selalu dalam bentuk JSON (bukan redirect ke halaman web login).\n2. Untuk endpoint yang terkunci, Flutter harus mengirim token di header: `Authorization: Bearer <token_aktif>`.\n3. Khusus untuk endpoint `POST /api/attendances` dan `POST /api/leaves`, karena mengirimkan file (foto), pastikan menggunakan `Content-Type: multipart/form-data` dari sisi Flutter.",
     "version": "1.0.0",
     "contact": {
       "name": "Gilang Abdian Anggara",
@@ -409,7 +409,9 @@
                     "is_checked_in": true,
                     "is_checked_out": false,
                     "check_in_time": "07:55:00",
-                    "check_out_time": null
+                    "check_out_time": null,
+                    "is_on_leave": false,
+                    "leave_details": null
                   }
                 }
               }
@@ -417,6 +419,176 @@
           },
           "401": {
             "description": "Error Sesi Habis / Token Invalid",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Akses ditolak.",
+                  "errors": {
+                    "auth": [
+                      "Sesi telah habis, silakan login kembali."
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/leaves": {
+      "get": {
+        "summary": "Riwayat Izin/Cuti",
+        "description": "Mengambil riwayat izin/cuti karyawan tersebut.",
+        "tags": [
+          "Leaves"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Riwayat izin berhasil diambil.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Riwayat izin berhasil diambil.",
+                  "data": [
+                    {
+                      "id": 1,
+                      "type": "sakit",
+                      "start_date": "2026-04-05",
+                      "end_date": "2026-04-07",
+                      "reason": "Demam tinggi",
+                      "image_proof_url": "https://domainkamu.com/storage/leaves/proof_1.jpg",
+                      "status": "approved",
+                      "note_admin": null,
+                      "created_at": "2026-04-04 10:00:00"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error Sesi Habis / Token Invalid",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Akses ditolak.",
+                  "errors": {
+                    "auth": [
+                      "Sesi telah habis, silakan login kembali."
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Ajukan Izin/Cuti",
+        "description": "Mengirim pengajuan izin baru (sakit, izin, atau cuti). Membutuhkan upload foto bukti.",
+        "tags": [
+          "Leaves"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Pilihan: sakit, izin, atau cuti",
+                    "example": "sakit",
+                    "enum": [
+                      "sakit",
+                      "izin",
+                      "cuti"
+                    ]
+                  },
+                  "start_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Tanggal mulai izin (YYYY-MM-DD)",
+                    "example": "2026-04-05"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Tanggal berakhir izin (YYYY-MM-DD)",
+                    "example": "2026-04-07"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "Alasan singkat pengajuan izin",
+                    "example": "Demam tinggi dan butuh istirahat"
+                  },
+                  "image_proof": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "File gambar bukti (surat dokter/surat izin)"
+                  }
+                },
+                "required": [
+                  "type",
+                  "start_date",
+                  "end_date",
+                  "reason",
+                  "image_proof"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pengajuan berhasil dikirim.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Pengajuan izin berhasil dikirim dan menunggu persetujuan Admin.",
+                  "data": {
+                    "id": 1,
+                    "status": "pending"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error Validasi",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Data tidak lengkap.",
+                  "errors": {
+                    "start_date": [
+                      "Tanggal mulai wajib diisi."
+                    ],
+                    "image_proof": [
+                      "Foto bukti wajib diunggah."
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error Sesi Habis",
             "content": {
               "application/json": {
                 "example": {

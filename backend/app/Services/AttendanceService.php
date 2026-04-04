@@ -9,8 +9,10 @@ use Illuminate\Validation\ValidationException;
 
 class AttendanceService
 {
-    public function __construct(protected OfficeService $officeService)
-    {
+    public function __construct(
+        protected OfficeService $officeService,
+        protected LeaveService $leaveService
+    ) {
     }
 
     /**
@@ -24,6 +26,13 @@ class AttendanceService
         $today = Carbon::today()->toDateString();
         $now = Carbon::now();
         $type = $data['type'];
+
+        // Cek apakah sedang dalam masa izin/cuti
+        if ($this->leaveService->isCurrentlyOnLeave($user)) {
+            throw ValidationException::withMessages([
+                'attendance' => ['Anda sedang dalam masa izin/cuti. Absensi tidak diizinkan.'],
+            ]);
+        }
 
         // Cek Geofencing (Radius Kantor)
         if (! $this->officeService->isWithinRadius($data['latitude'], $data['longitude'])) {
@@ -99,11 +108,19 @@ class AttendanceService
             ->where('date', $today)
             ->first();
 
+        $leave = $this->leaveService->isCurrentlyOnLeave($user);
+
         return [
             'is_checked_in' => (bool) $attendance,
             'is_checked_out' => $attendance && (bool) $attendance->check_out_time,
             'check_in_time' => $attendance ? $attendance->check_in_time : null,
             'check_out_time' => ($attendance && $attendance->check_out_time) ? $attendance->check_out_time : null,
+            'is_on_leave' => (bool) $leave,
+            'leave_details' => $leave ? [
+                'type' => $leave->type,
+                'reason' => $leave->reason,
+                'end_date' => $leave->end_date,
+            ] : null,
         ];
     }
 

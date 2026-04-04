@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // Membuat Akun Admin Utama
         User::updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@admin.com')],
+            ['email' => env('ADMIN_EMAIL', 'admin@gmail.com')],
             [
                 'name' => 'Admin Utama',
                 'password' => Hash::make(env('ADMIN_PASS', 'password')),
