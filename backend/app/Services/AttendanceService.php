@@ -9,6 +9,10 @@ use Illuminate\Validation\ValidationException;
 
 class AttendanceService
 {
+    public function __construct(protected OfficeService $officeService)
+    {
+    }
+
     /**
      * Store a new attendance record (Check-In or Check-Out).
      *
@@ -20,6 +24,13 @@ class AttendanceService
         $today = Carbon::today()->toDateString();
         $now = Carbon::now();
         $type = $data['type'];
+
+        // Cek Geofencing (Radius Kantor)
+        if (! $this->officeService->isWithinRadius($data['latitude'], $data['longitude'])) {
+            throw ValidationException::withMessages([
+                'attendance' => ['Anda berada di luar radius kantor yang diizinkan.'],
+            ]);
+        }
 
         // Get existing record for today
         $attendance = Attendance::where('user_id', $user->id)

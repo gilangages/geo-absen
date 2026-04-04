@@ -102,8 +102,129 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (success && _viewModel.successMessage != null) {
       _showSnackBar(_viewModel.successMessage!);
     } else if (_viewModel.errorMessage != null) {
-      _showSnackBar(_viewModel.errorMessage!, isError: true);
+      // Tampilkan dialog khusus jika error karena di luar radius kantor
+      if (_viewModel.isOutOfRadiusError) {
+        _showOutOfRadiusDialog();
+      } else {
+        _showSnackBar(_viewModel.errorMessage!, isError: true);
+      }
     }
+  }
+
+  /// Menampilkan bottom sheet informatif saat user di luar radius kantor.
+  void _showOutOfRadiusDialog() {
+    if (!mounted) return;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Ikon peringatan
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.location_off_rounded,
+                color: Colors.red.shade400,
+                size: 36,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Judul
+            Text(
+              'Di Luar Jangkauan Kantor',
+              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+
+            // Penjelasan
+            Text(
+              'Lokasi Anda saat ini berada di luar radius minimum absensi. '
+              'Pastikan Anda berada dalam jarak maksimal 100 meter dari kantor '
+              'untuk dapat melakukan absensi.',
+              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                    color: Colors.black54,
+                    height: 1.5,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+
+            // Info radius dalam badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.radar_rounded,
+                    color: colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Radius absensi: 100 meter',
+                    style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.primary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Tombol tutup
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Mengerti'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
