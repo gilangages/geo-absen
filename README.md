@@ -40,6 +40,8 @@ php artisan key:generate
 ```
 
 **Konfigurasi Penting `.env` Backend:**
+
+0.  **APP_URL**: Pastikan atur menjadi seperti ini `APP_URL=http://localhost:8000`.
 1.  **Database**: Atur `DB_CONNECTION=mysql` dan sesuaikan kredensial database Anda.
 2.  **Filesystem**: Ubah `FILESYSTEM_DISK=public` agar foto selfie bisa diakses publik.
 3.  **Admin Seeder**: Tambahkan variabel berikut untuk akun admin pertama:
