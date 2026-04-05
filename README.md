@@ -78,7 +78,7 @@ Ada dua cara umum untuk menjalankan aplikasi Flutter di projek ini:
 - **Web Browser (Chrome) - Spesifik Port 3000:**
   Jika Anda ingin mengetes melalui Chrome, gunakan perintah di bawah ini agar port terkunci di **3000**. Hal ini penting karena Laravel CORS sudah dikonfigurasi untuk menerima request dari `http://localhost:3000`:
   ```bash
-  flutter run -d chrome --web-server 3000
+  flutter run -d chrome --web-port 3000
   ```
   *(Catatan: Perintah ini memastikan port tidak berubah-ubah saat proses reload/restart)*.
 
